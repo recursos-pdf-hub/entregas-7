@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0c3b3f">
+<title>FyzioMapa · aplikáce</title>
+<link rel="icon" href="img/logo.png">
+<style>
+:root{--bg:#f6f2ec;--sf:#fff;--ink:#14262a;--soft:#4f6366;--mut:#8fa1a3;--ac:#0d857a;--acd:#0b6b62;--navy:#0c3b3f;--soft2:#def3f0;--sky:#a9e2da;--amb:#f3b54a;--ambs:#fdf4e1;--line:#e2dacd;--bad:#b4442f;--bads:#fbe9e4}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+body{line-break:strict;overflow-wrap:anywhere}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--ac)}
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top))}
+.top img{width:30px;height:30px;border-radius:8px;background:#fff}
+.top b{font-size:16px;letter-spacing:.04em}
+.top .sp{flex:1}
+.top .chip{font-size:12px;background:rgba(255,255,255,.12);border-radius:99px;padding:5px 10px;white-space:nowrap}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 96px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px;padding-bottom:max(6px,env(safe-area-inset-bottom))}
+.tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--soft);padding:4px 10px;border-radius:10px;min-width:64px}
+.tabs button span{font-size:20px;line-height:1}
+.tabs button.on{color:var(--ac);background:var(--soft2)}
+h1{font-size:22px;line-height:1.4;color:var(--navy);margin:6px 0 10px}
+h2{font-size:18px;color:var(--navy);margin:22px 0 10px}
+.muted{color:var(--soft);font-size:14px;line-height:1.8}
+.card{background:var(--sf);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 6px 20px -14px rgba(20,38,42,.35)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--sf);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:20px;color:var(--navy)}
+.stat small{font-size:11px;color:var(--soft)}
+.cta{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-radius:18px;padding:16px;background:var(--ac);color:#fff;margin-top:12px}
+.cta.sec{background:var(--sf);color:var(--ink);border:1px solid var(--line)}
+.cta .ic{font-size:26px}
+.cta b{display:block;font-size:16px}
+.cta small{opacity:.85;font-size:12.5px}
+.cta .go{margin-left:auto;font-size:20px}
+.lvls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.lvls button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 6px;font-size:14px;font-weight:700}
+.lvls button small{display:block;font-weight:400;font-size:11px;color:var(--soft);margin-top:2px}
+.sect{font-size:13px;font-weight:800;letter-spacing:.08em;color:#fff;background:var(--navy);border-radius:10px;padding:7px 12px;margin:22px 0 10px}
+.grp{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--navy);margin:14px 2px 8px}
+.grp .gi{width:36px;height:36px;border-radius:10px;background:var(--soft2);display:grid;place-items:center;font-size:19px}
+.list{display:grid;gap:8px}
+@media(min-width:640px){.list{grid-template-columns:1fr 1fr}}
+.tp{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.tp .n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--bg);color:var(--ac);font-weight:800;display:grid;place-items:center;font-size:13px}
+.tp .t{flex:1;font-size:14.5px;line-height:1.45;font-weight:600}
+.ring{flex:none;width:34px;height:34px}
+.search{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:16px;background:#fff}
+.crumb{font-size:12.5px;color:var(--soft);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.pager button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 4px;font-size:13px;font-weight:700;color:var(--soft)}
+.pager button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pager button small{display:block;font-weight:400;font-size:10.5px;opacity:.8}
+.mapimg{display:block;width:100%;max-width:560px;margin:0 auto;border-radius:16px;box-shadow:0 8px 26px -14px rgba(20,38,42,.5);cursor:zoom-in}
+.lead{font-size:15px;line-height:1.85;color:var(--soft);margin:4px 0 12px}
+.facts{display:grid;gap:10px}
+@media(min-width:640px){.facts{grid-template-columns:1fr 1fr}}
+.fc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.fc h3{margin:0;font-size:16.5px;color:var(--navy)}
+.fc .al{font-size:12px;color:var(--mut);margin:2px 0 6px}
+.fc dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14px;line-height:1.7}
+.fc dt{font-weight:800;color:var(--ac);font-size:12px;padding-top:3px;white-space:nowrap}
+.fc dd{margin:0}
+.fc.it{border-top:4px solid var(--ac)}
+.fc.it h3{color:var(--ac);font-size:15.5px;margin-bottom:4px}
+.fc.it p{margin:0;font-size:14.5px;line-height:1.85}
+.extra{margin-top:16px}
+.fichas{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.fichas button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:6px;text-align:center;font-size:12.5px;font-weight:700;color:var(--navy)}
+.fichas img{width:100%;border-radius:10px;display:block;margin-bottom:6px}
+.seq{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}
+.seq .st{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#eef0ef}
+.seq .st img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s}
+.seq .st img.on{opacity:1}
+.seq .cap{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13.5px;gap:8px}
+.seq .cap b{color:var(--navy);font-size:15px}
+.seq .dots{display:flex;gap:6px}
+.seq .dots button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:700}
+.seq .dots button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.kp{list-style:none;margin:0;padding:0}
+.kp li{position:relative;padding:10px 0 10px 34px;border-bottom:1px dashed var(--line);font-size:15px;line-height:1.7}
+.kp li:before{content:"✓";position:absolute;left:2px;top:11px;width:22px;height:22px;border-radius:50%;background:var(--ac);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.case{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
+.case p{margin:4px 0 0;font-size:15px;line-height:1.85}
+.case .lb{font-weight:800;color:var(--navy);font-size:13.5px}
+.reveal{margin-top:10px;border:1px dashed var(--ac);background:var(--soft2);color:var(--acd);border-radius:12px;padding:10px;width:100%;font-weight:700}
+.qbox{margin-top:16px}
+.q{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
+.q .hd{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--soft);margin-bottom:6px}
+.lv{display:inline-block;font-size:11.5px;font-weight:800;border-radius:99px;padding:2px 9px}
+.lv.Základní{background:var(--soft2);color:var(--acd)}.lv.Pokročilý{background:var(--ambs);color:#8a5a00}.lv.Klinický{background:var(--navy);color:#fff}
+.q .qt{font-size:15.5px;font-weight:700;line-height:1.7}
+.ops{display:grid;gap:8px;margin-top:10px}
+.ops button{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:11px 12px;font-size:15px;line-height:1.55}
+.ops button b{flex:none;width:24px;height:24px;border-radius:7px;background:var(--bg);display:grid;place-items:center;font-size:12.5px;color:var(--navy)}
+.ops button.ok{border-color:var(--ac);background:var(--soft2)}
+.ops button.ng{border-color:var(--bad);background:var(--bads)}
+.ops button[disabled]{cursor:default}
+.exp{margin-top:10px;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.8}
+.exp.ok{background:var(--soft2)}.exp.ng{background:var(--bads)}
+.exp b{display:block;margin-bottom:2px}
+.nav2{display:flex;gap:8px;margin-top:18px}
+.nav2 button{flex:1;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;font-weight:700;color:var(--navy);font-size:14px}
+.nav2 button.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+.bar{height:10px;border-radius:99px;background:#ebe5da;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:99px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.badge{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;font-size:12.5px;color:var(--soft)}
+.badge .e{font-size:28px;display:block;filter:grayscale(1);opacity:.35}
+.badge b{display:block;color:var(--ink);font-size:13.5px;margin:4px 0 2px}
+.badge.on .e{filter:none;opacity:1}
+.badge.on{border-color:var(--ac)}
+.boxes{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center}
+.boxes div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 2px;font-size:11px;color:var(--soft)}
+.boxes b{display:block;font-size:18px;color:var(--navy)}
+.zoom{position:fixed;inset:0;z-index:50;background:rgba(12,59,63,.94);display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+.zoom.on{display:block}
+.zoom img{display:block;width:100%;max-width:1086px;margin:0 auto;min-height:20px}
+.zoom button{position:fixed;top:max(12px,env(safe-area-inset-top));right:12px;z-index:51;border:0;border-radius:99px;background:#fff;color:var(--navy);font-weight:800;padding:10px 16px}
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:99px;padding:10px 18px;font-size:14px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.foot{font-size:12px;color:var(--mut);line-height:1.8;margin-top:28px;border-top:1px solid var(--line);padding-top:12px}
+.empty{text-align:center;padding:26px 10px}
+.empty .e{font-size:42px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top"><img src="img/logo.png" alt=""><b>FyzioMapa</b><span class="sp"></span><span class="chip" id="hdStreak">🔥 0 dnů</span><span class="chip" id="hdPts">⭐ 0</span></header>
+<main class="wrap" id="view"></main>
+<nav class="tabs" id="tabs">
+  <button data-go="home"><span>🏠</span>Domů</button>
+  <button data-go="temas"><span>🗺️</span>Témata</button>
+  <button data-go="memoria"><span>🧠</span>Paměť</button>
+  <button data-go="progreso"><span>📈</span>Pokrok</button>
+</nav>
+<div class="zoom" id="zoom"><button id="zoomX">Zavřít ✕</button><img id="zoomImg" alt=""></div>
+<div class="toast" id="toast"></div>
+<script src="data.js"></script>
+<script>
+(function(){
+const D = window.PM_DATA, T = D.temas, IDS = Object.keys(T).map(Number).sort((a,b)=>a-b);
+const LET = 'ABCD', LVL = ['Základní','Pokročilý','Klinický'], DAY = 864e5;
+const INTERVAL = [0,1,2,4,7,14]; // caja 1..5 → días
+const KEY = 'fiziotérkép-hu-v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function today(){ const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); }
+// ---------- estado (localStorage con try/catch) ----------
+let S = {q:{}, seen:{}, days:[], pts:0, ok:0, ans:0, badges:{}, last:null};
+try { const r = localStorage.getItem(KEY); if (r) S = Object.assign(S, JSON.parse(r)); } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+const ALLQ = []; IDS.forEach(i => T[i].questions.forEach((q,k) => ALLQ.push({id:`${i}-${k}`, t:i, k, q})));
+const QI = {}; ALLQ.forEach(x => QI[x.id] = x);
+function streak(){
+  const set = new Set(S.days); let d = today(), n = 0;
+  if (!set.has(d)) d -= DAY;
+  while (set.has(d)) { n++; d -= DAY; }
+  return n;
+}
+function mastery(i){ let m=0; T[i].questions.forEach((q,k)=>{ const r=S.q[`${i}-${k}`]; if(r && r.box>=3) m++; }); return m/6; }
+function answered(i){ let m=0; T[i].questions.forEach((q,k)=>{ if(S.q[`${i}-${k}`]) m++; }); return m; }
+function due(){ const t=today(); return ALLQ.filter(x => { const r=S.q[x.id]; return r && r.due<=t && r.box<6; }); }
+function record(id, ok){
+  const t = today(); const r = S.q[id] || {box:0, due:t, n:0, ok:0};
+  r.n++; if (ok) { r.ok++; r.box = Math.min(5, Math.max(1, r.box + 1)); } else { r.box = 1; }
+  r.due = t + (ok ? INTERVAL[r.box] : 1) * DAY; // špatná odpověď se vrátí druhý den
+  S.q[id] = r; S.ans++; if (ok) { S.ok++; S.pts += 10; } else { S.pts += 2; }
+  if (!S.days.includes(t)) S.days.push(t);
+  checkBadges(); save(); head();
+}
+const BADGES = [
+  ['first','🌱','První krok','Opovězte na první otázku', () => S.ans>=1],
+  ['s3','🔥','3 dny v řadě','Studujte 3 dny v řadě', () => streak()>=3],
+  ['s7','🏅','Týden v kuse','Studujte 7 dní v řadě', () => streak()>=7],
+  ['ok50','🎯','50 správných odpovědí','Celkem 50 správných odpovědí', () => S.ok>=50],
+  ['ok150','💯','150 správných odpovědí','Celkem 150 správných odpovědí', () => S.ok>=150],
+  ['clin10','🩺','Klinický debut','10 správných „Klinických“ odpovědí', () => ALLQ.filter(x=>x.q.level==='Klinický' && (S.q[x.id]||{}).ok>0).length>=10],
+  ['m1','🗺️','První mistrovský stupeň','Jedno téma se 100% znalostí', () => IDS.some(i=>mastery(i)===1)],
+  ['m10','🧭','10 témat na mistrovské úrovni','10 témat se 100% znalostí', () => IDS.filter(i=>mastery(i)===1).length>=10],
+  ['all','🏆','Všechna témata','Otevřete všech 54 témat', () => IDS.every(i=>S.seen[i])],
+  ['box5','🧠','Dlouhodobá paměť','20 otázek v 5. boxu', () => Object.values(S.q).filter(r=>r.box>=5).length>=20],
+];
+function checkBadges(){ BADGES.forEach(([id,e,n]) => { if (!S.badges[id] && BADGES.find(b=>b[0]===id)[4]()) { S.badges[id] = today(); toast(`${e} Nové ocenění: „${n}”!`); } }); }
+function head(){ $('#hdStreak').textContent = `🔥 ${streak()} dnů`; $('#hdPts').textContent = `⭐ ${S.pts}`; }
+let tt; function toast(m){ const el=$('#toast'); el.textContent=m; el.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('on'),2600); }
+function ring(p){ const c=2*Math.PI*14, o=c*(1-p); return `<svg class="ring" viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="none" stroke="#ebe5da" stroke-width="4"/><circle cx="17" cy="17" r="14" fill="none" stroke="#0d857a" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${o}" transform="rotate(-90 17 17)"/><text x="17" y="21" text-anchor="middle" font-size="10" font-weight="700" fill="#0c3b3f">${Math.round(p*100)}</text></svg>`; }
+// ---------- preguntas ----------
+function qHTML(id, n){
+  const x = QI[id], q = x.q;
+  return `<div class="q" data-q="${id}"><div class="hd"><span class="lv ${q.level}">${q.level}</span><span>${n||''}</span></div><div class="qt">${esc(q.q)}</div><div class="ops">${q.options.map((o,j)=>`<button data-o="${j}"><b>${LET[j]}</b><span>${esc(o)}</span></button>`).join('')}</div><div class="res"></div></div>`;
+}
+function bindQ(root, onDone){
+  root.querySelectorAll('.q').forEach(el => el.querySelectorAll('.ops button').forEach(b => b.addEventListener('click', () => {
+    const id = el.dataset.q, q = QI[id].q, j = +b.dataset.o, ok = j === q.answer;
+    el.querySelectorAll('.ops button').forEach((bb,k) => { bb.disabled = true; if (k===q.answer) bb.classList.add('ok'); });
+    if (!ok) b.classList.add('ng');
+    el.querySelector('.res').innerHTML = `<div class="exp ${ok?'ok':'ng'}"><b>${ok?'Správně! +10':'Není to správně. Správná odpověď je: '+LET[q.answer]}</b>${esc(q.exp)}${ok?'':'<br><small>Tato otázka se zítra vrátí v paměťovém módu.</small>'}</div>`;
+    record(id, ok); if (onDone) onDone(ok);
+  })));
+}
+// ---------- vistas ----------
+function home(){
+  const d = due().length, nuevos = ALLQ.filter(x=>!S.q[x.id]).length;
+  const last = S.last && T[S.last] ? S.last : null;
+  return `<h1>Fyzioterapie s vizuálními mapami a opakováním, které si skutečně zapamatujete</h1>
+  <p class="muted">Přečtěte si stránku → odpovězte na 2 rychlé otázky → opakujte ve správný čas → postupte na další úroveň.</p>
+  <div class="stats"><div class="stat"><b>${streak()}</b><small>denní série</small></div><div class="stat"><b>${S.pts}</b><small>bodů</small></div><div class="stat"><b>${IDS.filter(i=>mastery(i)===1).length}</b><small>témat na mistrovské úrovni</small></div><div class="stat"><b>${Object.keys(S.badges).length}</b><small>ocenění</small></div></div>
+  <button class="cta" data-go="memoria"><span class="ic">🧠</span><span><b>Paměťový režim</b><small>${d?`Dnešní opakování: ${d} otázek`:'Dnes nemáte žádné opakování. Pokračujte novými otázkami!'}</small></span><span class="go">›</span></button>
+  ${last?`<button class="cta sec" data-tema="${last}"><span class="ic">${T[last].icono}</span><span><b>Pokračovat: ${esc(T[last].title)}</b><small>${last}. téma / 54</small></span><span class="go">›</span></button>`:`<button class="cta sec" data-tema="1"><span class="ic">🧭</span><span><b>Začněte prvním tématem</b><small>Roviny a osy</small></span><span class="go">›</span></button>`}
+  <h2>Procvičování podle úrovní</h2><p class="muted" style="margin:0">10 otázek najednou, nejprve ty dosud nevyřešené (nezodpovězené: ${nuevos}).</p>
+  <div class="lvls">${LVL.map((l,k)=>`<button data-lv="${l}"><span class="lv ${l}">${l}</span><small>${['O mapě','O listu','Kazuistiky'][k]}</small></button>`).join('')}</div>
+  <h2>PDF verze</h2><button class="cta sec" data-pdf="1"><span class="ic">📄</span><span><b>PDF ke stažení a tisku</b><small>Všechna témata + otázky + řešení s vysvětlením</small></span><span class="go">↓</span></button>
+  ${foot()}`;
+}
+function foot(){ return `<p class="foot">Studijní a referenční materiál pro studenty fyzioterapie a odborníky. Nenahrazuje vyšetření kvalifikovaným zdravotnickým pracovníkem; o vyšetření a léčbě jednotlivých pacientů rozhoduje odpovědný odborník. Váš postup je uložen v prohlížeči tohoto nástroje.</p>`; }
+function temas(qs){
+  qs = (qs||'').trim();
+  let h = `<h1>Všechna témata</h1><input class="search" id="q" type="search" placeholder="Hledat podle názvu tématu nebo testu (např. Lachman)" value="${esc(qs)}">`;
+  if (qs) {
+    const hit = IDS.filter(i => JSON.stringify(T[i]).includes(qs));
+    h += `<p class="muted">${hit.length} výsledků</p><div class="list">${hit.map(tp).join('')}</div>`;
+  } else {
+    D.secciones.forEach(s => { h += `<div class="sect">${esc(s.nombre)}</div>`; s.grupos.forEach(g => { h += `<div class="grp"><span class="gi">${g.icono}</span>${esc(g.nombre)}</div><div class="list">${g.temas.map(tp).join('')}</div>`; }); });
+  }
+  return h + foot();
+}
+function tp(i){ return `<button class="tp" data-tema="${i}"><span class="n">${i}</span><span class="t">${esc(T[i].title)}</span>${ring(mastery(i))}</button>`; }
+function tema(i, p){
+  const d = T[i]; S.seen[i] = 1; S.last = i; checkBadges(); save();
+  const pg = [['1','Vizuální mapa'],['2','Informační list'],['3','Klinický význam']];
+  let h = `<div class="crumb"><span>${d.icono}</span><span>${esc(d.seccion)}</span><span>›</span><span>${esc(d.grupo)}</span><span style="margin-left:auto">${i}. téma / 54</span></div><h1>${esc(d.title)}</h1>
+  <div class="pager">${pg.map(([n,l],k)=>`<button class="${k===p?'on':''}" data-pg="${k}">${n}. strana<small>${l}</small></button>`).join('')}</div>`;
+  if (p === 0) {
+    h += `<p class="lead">${esc(d.lead)}</p><img class="mapimg" src="${d.mapa}" alt="${esc(d.title)} – vizuální mapa" data-zoom="${d.mapa}"><p class="muted" style="text-align:center;font-size:12.5px">Klepněte pro zvětšení</p>`;
+  } else if (p === 1) {
+    const sh = d.sheet;
+    h += sh.kind === 'tests'
+      ? `<div class="facts">${sh.tests.map(t=>`<div class="fc"><h3>${esc(t.name)}</h3><div class="al">${t.alias?'Jinak také: '+esc(t.alias):'&nbsp;'}</div><dl><dt>Provedení</dt><dd>${esc(t.steps)}</dd><dt>Pozitivní</dt><dd>${esc(t.positive)}</dd><dt>Testovaná struktura</dt><dd>${esc(t.tissue)}</dd><dt>Tip</dt><dd>${esc(t.point)}</dd></dl></div>`).join('')}</div>`
+      : `<p class="lead">${esc(d.lead)}</p><div class="facts">${sh.items.map(x=>`<div class="fc it"><h3>${esc(x.h)}</h3><p>${esc(x.t)}</p></div>`).join('')}</div>`;
+    if (d.fichas.length) h += `<div class="extra"><h2>Ilustrované listy</h2><div class="fichas">${d.fichas.map(f=>`<button data-zoom="${f.img}"><img src="${f.img}" alt="" loading="lazy">${esc(f.nombre)}</button>`).join('')}</div></div>`;
+    if (d.secuencias.length) h += `<div class="extra"><h2>Pohyb v obrazech</h2>${d.secuencias.map((s,k)=>`<div class="seq" data-seq="${k}"><div class="st">${s.frames.map((f,j)=>`<img src="${f}" alt="" class="${j===0?'on':''}" loading="lazy">`).join('')}</div><div class="cap"><span><b>${esc(s.nombre)}</b><br><small>${esc(s.rotulo)}: ${esc(s.texto)}</small></span><span class="dots">${[0,1,2].map(j=>`<button data-f="${j}" class="${j===0?'on':''}">${j+1}</button>`).join('')}</span></div></div>`).join('')}</div>`;
+  } else {
+    h += `<p class="lead">${esc(d.lead)}</p><h2 style="margin-top:6px">5 bodů, které stojí za zapamatování</h2><ul class="kp">${d.keypoints.map(k=>`<li>${esc(k)}</li>`).join('')}</ul>
+    <h2>Promyslete si kazuistiku</h2><div class="case"><div class="lb">Případ</div><p>${esc(d.case.text)}</p><button class="reveal" id="rv">Zobrazit řešení</button><div id="rvt" hidden><div class="lb" style="margin-top:10px">Gondolatmenet</div><p>${esc(d.case.answer)}</p></div></div>`;
+  }
+  h += `<div class="qbox"><h2>Kontrolní otázky (${LVL[p]})</h2>${[0,1].map(k=>qHTML(`${i}-${p*2+k}`, `Q${p*2+k+1}`)).join('')}</div>`;
+  const nx = p<2 ? `data-tema="${i}" data-p="${p+1}"` : (i<54 ? `data-tema="${i+1}"` : `data-go="temas"`);
+  const pv = p>0 ? `data-tema="${i}" data-p="${p-1}"` : (i>1 ? `data-tema="${i-1}" data-p="2"` : `data-go="temas"`);
+  h += `<div class="nav2"><button ${pv}>‹ Zpět</button><button class="pri" ${nx}>${p<2?'Další strana ›':(i<54?'Další téma ›':'Zpět na témata')}</button></div>`;
+  return h + foot();
+}
+let sesion = null;
+function memoria(){
+  const d = due(); const boxes=[1,2,3,4,5].map(b=>Object.values(S.q).filter(r=>r.box===b).length);
+  return `<h1>Paměťový režim</h1><p class="muted">Leitnerův systém: špatná odpověď se vrátí do 1. boxu a zopakuje se následující den; správná odpověď postupuje do dalšího boxu a zeptáme se na ni za 1, 2, 4, 7 a poté 14 dní.</p>
+  <div class="boxes">${boxes.map((n,k)=>`<div><b>${n}</b>${k+1}. přihrádka</div>`).join('')}</div>
+  <button class="cta" data-start="due" ${d.length?'':'disabled style="opacity:.55"'}><span class="ic">🧠</span><span><b>Spustit dnešní opakování</b><small>${d.length} otázek</small></span><span class="go">›</span></button>
+  <button class="cta sec" data-start="new"><span class="ic">✨</span><span><b>10 nových otázek</b><small>Z dosud nevyřešených (od základní úrovně)</small></span><span class="go">›</span></button>
+  <button class="cta sec" data-start="mix"><span class="ic">🔀</span><span><b>10 náhodných otázek</b><small>Ze všech 324 otázek</small></span><span class="go">›</span></button>` + foot();
+}
+function startSession(list, nombre){
+  if (!list.length) { toast('V tomto kole už nejsou žádné otázky'); return; }
+  sesion = {list: list.map(x=>x.id), i:0, ok:0, nombre}; render('sesion');
+}
+function pick(kind, lv){
+  const sh = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+  if (kind==='due') return sh(due()).slice(0,30);
+  if (kind==='new') { const n = ALLQ.filter(x=>!S.q[x.id]); return LVL.flatMap(l=>n.filter(x=>x.q.level===l)).slice(0,10); }
+  if (kind==='lv') { const a = ALLQ.filter(x=>x.q.level===lv); const n = sh(a.filter(x=>!S.q[x.id])); return n.concat(sh(a.filter(x=>S.q[x.id]))).slice(0,10); }
+  return sh(ALLQ).slice(0,10);
+}
+function sesionV(){
+  const s = sesion; if (!s) return memoria();
+  if (s.i >= s.list.length) return `<div class="empty"><div class="e">🎉</div><h1>Skvělá práce!</h1><p class="muted">${s.nombre}: ${s.ok} správně z ${s.list.length} otázek</p></div><button class="cta" data-go="memoria"><span class="ic">🧠</span><span><b>Zpět do paměťového režimu</b></span><span class="go">›</span></button><button class="cta sec" data-go="home"><span class="ic">🏠</span><span><b>Úvodní stránka</b></span><span class="go">›</span></button>`;
+  const x = QI[s.list[s.i]];
+  return `<div class="crumb"><span>${esc(s.nombre)}</span><span style="margin-left:auto">${s.i+1} / ${s.list.length}</span></div><div class="bar" style="margin:8px 0 4px"><i style="width:${s.i/s.list.length*100}%"></i></div>
+  ${qHTML(x.id, `Téma ${x.t}: ${esc(T[x.t].title)}`)}
+  <div class="nav2"><button data-tema="${x.t}">Otevřít téma</button><button class="pri" id="nextQ" disabled style="opacity:.5">Pokračovat ›</button></div>`;
+}
+function progreso(){
+  const tot = ALLQ.length, vistos = Object.keys(S.q).length;
+  let h = `<h1>Pokrok</h1><div class="stats"><div class="stat"><b>${streak()}</b><small>denní série</small></div><div class="stat"><b>${S.pts}</b><small>bodů</small></div><div class="stat"><b>${S.ans?Math.round(S.ok/S.ans*100):0}%</b><small>úsěšnost</small></div><div class="stat"><b>${vistos}/${tot}</b><small>vyřešené otázky</small></div></div>
+  <h2>Ocenění</h2><div class="badges">${BADGES.map(([id,e,n,t])=>`<div class="badge ${S.badges[id]?'on':''}"><span class="e">${e}</span><b>${n}</b>${t}</div>`).join('')}</div>
+  <h2>Znalosti podle témat</h2>`;
+  D.secciones.forEach(s => { h += `<div class="sect">${esc(s.nombre)}</div><div class="list">${s.grupos.flatMap(g=>g.temas).map(tp).join('')}</div>`; });
+  h += `<p class="muted" style="margin-top:16px">Znalosti = kolik ze 6 otázek tématu se dostalo alespoň do 3. boxu.</p>
+  <button class="cta sec" id="reset"><span class="ic">↺</span><span><b>Smazat postup</b><small>Vymaže všechna data na tomto zařízení</small></span></button>`;
+  return h + foot();
+}
+// ---------- router ----------
+let cur = 'home';
+function render(v, a, b){
+  cur = v; const el = $('#view');
+  el.innerHTML = v==='home'?home():v==='temas'?temas(a):v==='tema'?tema(a,b||0):v==='memoria'?memoria():v==='sesion'?sesionV():progreso();
+  document.querySelectorAll('#tabs button').forEach(t => t.classList.toggle('on', t.dataset.go===v || (v==='tema'&&t.dataset.go==='temas') || (v==='sesion'&&t.dataset.go==='memoria')));
+  bindQ(el, v==='sesion' ? ok => { if (ok) sesion.ok++; const n=$('#nextQ'); n.disabled=false; n.style.opacity=1; n.onclick=()=>{ sesion.i++; render('sesion'); }; } : null);
+  if (v==='temas') { const q=$('#q'); q.addEventListener('input', () => { const val=q.value; render('temas', val); const nq=$('#q'); nq.focus(); nq.setSelectionRange(val.length,val.length); }); }
+  if (v==='tema') { const r=$('#rv'); if (r) r.onclick=()=>{ $('#rvt').hidden=false; r.remove(); }; initSeq(); }
+  const rs = $('#reset'); if (rs) rs.onclick = () => { if (confirm('Opravdu chcete smazat celý svůj postup?')) { S = {q:{},seen:{},days:[],pts:0,ok:0,ans:0,badges:{},last:null}; save(); head(); render('progreso'); } };
+  try { history.replaceState(null, '', v==='tema' ? `#t${a}-${b||0}` : '#'+v); } catch(e) {}
+  window.scrollTo(0,0); head();
+}
+let seqT = [];
+function initSeq(){
+  seqT.forEach(clearInterval); seqT = [];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.seq').forEach(sq => {
+    let f = 0; const imgs = sq.querySelectorAll('.st img'), dots = sq.querySelectorAll('.dots button');
+    const show = n => { f = n; imgs.forEach((im,j)=>im.classList.toggle('on', j===n)); dots.forEach((d,j)=>d.classList.toggle('on', j===n)); };
+    dots.forEach(d => d.onclick = () => show(+d.dataset.f));
+    if (!reduce) seqT.push(setInterval(() => show((f+1)%3), 1400));
+  });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go],[data-tema],[data-pg],[data-zoom],[data-lv],[data-start],[data-pdf]'); if (!b || b.disabled) return;
+  if (b.dataset.zoom) { $('#zoomImg').src = b.dataset.zoom; $('#zoom').classList.add('on'); return; }
+  if (b.dataset.pdf) { window.open('../files/physiomap-pdf.pdf', '_blank', 'noopener'); return; }
+  if (b.dataset.go) return render(b.dataset.go);
+  if (b.dataset.tema) return render('tema', +b.dataset.tema, +(b.dataset.p||0));
+  if (b.dataset.pg) { const m = location.hash.match(/^#t(\d+)/); return render('tema', m?+m[1]:S.last||1, +b.dataset.pg); }
+  if (b.dataset.lv) return startSession(pick('lv', b.dataset.lv), `Procvičování · ${b.dataset.lv}`);
+  if (b.dataset.start) return startSession(pick(b.dataset.start), {due:'Dnešní opakování',new:'Nové otázky',mix:'10 náhodných otázek'}[b.dataset.start]);
+});
+$('#zoomX').onclick = () => $('#zoom').classList.remove('on');
+const h0 = location.hash.match(/^#t(\d+)-(\d)/);
+if (h0 && T[+h0[1]]) render('tema', +h0[1], +h0[2]); else render(['temas','memoria','progreso'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home');
+})();
+</script>
+</body>
+</html>
